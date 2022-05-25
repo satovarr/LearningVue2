@@ -1,4 +1,3 @@
-/* eslint-disable */
 <template>
   <div class="hello">
     <div class="poster">
@@ -6,17 +5,17 @@
       <p>User id: <input v-model="post.userId"></p>
       <p>Title: <input v-model="post.title"></p>
       <p>Content: <input v-model="post.description"></p>
-      <button v-on:click="post">POST</button>
+      <button v-on:click="postPost">POST</button>
     </div>
 
    <div class="posts"> 
-      <section v-for="post in posts" :key="post.id" class="post">
+      <section v-for="post in this.$store.state.posts" :key="post.id" class="post">
         <p><strong>{{ users[post.userId] }}</strong></p>
         <h3>{{ post.title }}</h3>
         <p>{{ post.body }}</p>
-        <button v-on:click="toggleLike(post.id)" v-on:hover="hoverLike(post.id)" class="like-area">
-          <i v-if="likes[post.id]===0" class="fa-solid fa-heart" style="color:white"></i>
-          <i v-if="likes[post.id]===2" class="fa-solid fa-heart" style="color:red"></i>
+        <button v-on:click="toggleLike(post)" class="like-area">
+          <i v-if="!post.like" class="fa-solid fa-heart" style="color:white"></i>
+          <i v-if="post.like " class="fa-solid fa-heart" style="color:red"></i>
         </button>
       </section>
     </div>
@@ -25,19 +24,20 @@
 </template>
 
 <script>
-import axios from 'axios'
+import axios from 'axios';
+
 export default {
   name: 'HelloWorld',
   data () {
     return {
       posts: {},
       post: {
-        userId: 0,
-        title: "Titl",
+        userId: 1,
+        title: "Title",
         description: "description"
       },
       users: {},
-      likes: []
+      likes: [1,2,3]
     }
   },
   beforeMount () {
@@ -45,23 +45,23 @@ export default {
     this.getUsers();
   },
   updated () {
-    console.log('updated');
+    console.log("updated");
 
   },
   methods: {
     getPosts () {
       axios.get('https://jsonplaceholder.typicode.com/posts/').then(response => {
-        this.posts = response.data,
-        // create likes array
-        this.likes = Array.from({length: this.posts.length}, (_, i) => 0)
+        this.$store.commit('savePosts', response.data)
       }).catch(e => console.log(e))
     },
     postPost () {
       axios.post('https://jsonplaceholder.typicode.com/posts/', {
         title: this.post.title,
         body: this.post.description,
-        userId: this.post.userId,})
-        .then(response => {console.log("POSTED", response.data)}).catch(e => {console.log(e)})
+        userId: this.post.userId})
+        .then(response => {
+          this.$store.commit('newPost', response.data)
+          }).catch(e => {console.log(e)})
     },
     getUsers() {
       axios.get('https://jsonplaceholder.typicode.com/users/').then(response => {
@@ -72,17 +72,10 @@ export default {
         console.log(this.users)
       }).catch(e => console.log(e))
     },
-    toggleLike(id) {
-
-      if (this.likes[id] === 0) {
-        console.log(id)
-        this.likes[id] = 2
-        this.likes = [...this.likes]
-      } else {
-        this.likes[id] = 0
-        this.likes = [...this.likes]
-
-      }
+    toggleLike(post) {
+        this.$store.commit('toggleLike', post.id)
+        post.id = post.id+100
+        post.id = post.id-100
     }
   }
 }
@@ -104,14 +97,4 @@ li {
 a {
   color: #42b983;
 }
-
-div.posts{
-  background: #b6cfc8;
-}
-section.post{
-  background: #939a98;
-}
-
-
-
 </style>

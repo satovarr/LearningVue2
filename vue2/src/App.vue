@@ -1,14 +1,18 @@
 <template>
   <div id="app">
     <img src="./assets/logo.png">
-    <h1>crear posts sencillos y se guarden los likes en el estado de la aplicación</h1>
-    <router-view/>
+    <HelloWorld/>
   </div>
 </template>
 
 <script>
+import HelloWorld from './components/HelloWorld'
+
 export default {
-  name: 'App'
+  name: 'App',
+  components: {
+    HelloWorld
+  }
 }
 </script>
 
